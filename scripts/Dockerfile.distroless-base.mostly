@@ -1,0 +1,3 @@
+FROM gcr.io/distroless/base-debian12
+COPY target/searchbot.mostly /
+ENTRYPOINT ["/searchbot.mostly"]

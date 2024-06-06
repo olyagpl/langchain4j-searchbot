@@ -1,0 +1,3 @@
+FROM scratch
+COPY target/searchbot.static-upx /
+ENTRYPOINT ["/searchbot.static-upx"]

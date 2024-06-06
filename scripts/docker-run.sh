@@ -1,0 +1,1 @@
+docker run  --rm -e OPENAI_API_KEY=<key> “Чому варто відвідати Львів?”
