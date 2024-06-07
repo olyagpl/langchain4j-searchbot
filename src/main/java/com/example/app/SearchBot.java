@@ -7,12 +7,12 @@ public class SearchBot {
 
     public static void main(String[] args) {
         if (args.length != 1) {
-            throw new IllegalArgumentException("Please provide input for the model as an argument");
+            throw new IllegalArgumentException("Please provide input for searchbot");
         }
        
         String apiKey = System.getenv("OPENAI_API_KEY");
         if (apiKey == null) {
-            throw new IllegalArgumentException("API key not found");
+            throw new IllegalArgumentException("OpenAI API key not found.");
         }
 
         ChatLanguageModel model = OpenAiChatModel.builder()
