@@ -1,9 +1,9 @@
 #!/bin/sh
 native-image \
-               -Ob \
+               -Os \
                -jar ./target/searchbot-1.0-jar-with-dependencies.jar \
                -H:+AllowDeprecatedBuilderClassesOnImageClasspath \
-               -H:+UnlockExperimentalVMOptions -H:+StaticExecutableWithDynamicLibC \
+               --static-nolibc \
                -o ./target/searchbot.mostly
 
 # Distroless Base (provides glibc)

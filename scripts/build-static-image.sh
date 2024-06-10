@@ -3,7 +3,7 @@ TOOLCHAIN_DIR=`pwd`/x86_64-linux-musl-native
 CC=${TOOLCHAIN_DIR}/bin/gcc
 PATH=${TOOLCHAIN_DIR}/bin:${PATH}
 native-image \
-               -Ob \
+               -Os \
                -jar ./target/searchbot-1.0-jar-with-dependencies.jar \
                -H:+AllowDeprecatedBuilderClassesOnImageClasspath \
                --static --libc=musl \

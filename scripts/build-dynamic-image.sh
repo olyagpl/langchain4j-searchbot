@@ -1,7 +1,7 @@
 #!/bin/sh
 # Compile with all dynamically linked shared libraries
 native-image \
-               -Ob \
+               -Os \
                -jar ./target/searchbot-1.0-jar-with-dependencies.jar \
                -H:+AllowDeprecatedBuilderClassesOnImageClasspath \
                -o ./target/searchbot.dynamic

@@ -1,6 +1,6 @@
 #!/bin/bash
 native-image \
-               -Ob \
+               -Os \
                --enable-sbom=cyclonedx \
                -jar ./target/searchbot-1.0-jar-with-dependencies.jar \
                -H:+AllowDeprecatedBuilderClassesOnImageClasspath \

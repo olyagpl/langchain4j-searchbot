@@ -9,16 +9,17 @@ This application is enhanced with the [GraalVM Native Image Maven plugin](https:
 
 The goal of this example is to demonstrate:
 - how easy it is to create a CLI application (that uses LangChain) using ahead-of-time (AOT) compilation
-- the use of Profile-Guided Optimization, optimizations for size (`-Os`), SBOM, and other advanced Native Image features
+- how to optimize a native executable for file size
 
 ### Prerequisites
-* GraalVM JDK (`sdk install java 21.0.2-graal`)
-* Maven
+
+* [GraalVM for JDK 23 Early Access build](https://github.com/graalvm/oracle-graalvm-ea-builds/releases)
 * An [OpenAI account](https://platform.openai.com/signup) and an [OpenAI API key](https://platform.openai.com/account/api-keys)
+* Maven
 
 > Note: To interact with OpenAI, store your OpenAI API key as the value of an environment variable named `OPENAI_API_KEY`.
 
-## Package the Application as a Native Executable Using with Maven
+## Package the Application as a Native Executable with Maven
 
 1. Clone this repository with Git and then enter it:
     ```bash
@@ -44,48 +45,53 @@ The goal of this example is to demonstrate:
     $ ./target/searchbot “Why should I visit Lviv?”
     ```
 
-## Create an Optimized Native Executable
+## Create a Native Executable Optimized for File Size
 
-Create an optimized native executable by taking advantage of some advanced Native Image features such as Profile-Guided Optimization, size optimization (`-Os`, with GraalVM for JDK 23 only), SBOM, and others.
+You can optimize your native executable by taking advantage of different optimization levels.
+The following levels are available:
+```bash
+# native-image --help output
+    -O                    control code optimizations: b - optimize for fastest build time, s
+                          - optimize for size, 0 - no optimizations, 1 - basic
+                          optimizations, 2 - advanced optimizations, 3 - all optimizations
+                          for best performance.
+```
 
-[Profile-Guided Optimization](https://www.graalvm.org/latest/reference-manual/native-image/optimizations-and-performance/PGO/) is a technique that brings profile information to an AOT compiler to improve the quality of its output in terms of performance and size.
+For this application, use the `-Os` option to create the smallest possible native executable.
 
-1. Build an “instrumented” executable:
+1. Create a native executable with the file size optimization on, and giving it a different name:
     ```bash
     $ native-image \
-                -Ob \
-                --pgo-instrument \
-                -jar ./target/searchbot-1.0-jar-with-dependencies.jar \
-                -H:+AllowDeprecatedBuilderClassesOnImageClasspath \
-                -o ./target/searchbot-instrumented
+        -Os \
+        -jar ./target/searchbot-1.0-jar-with-dependencies.jar \
+        -H:+AllowDeprecatedBuilderClassesOnImageClasspath \
+        -o ./target/searchbot-optimized
     ```
 
-2. Run the executable to gather a profile:
+2. Interact with the searchbot to test it: 
     ```bash
-    $ ./target/searchbot-instrumented “What is the weather today?”
-    ```
- 
-3. Build an optimized executable using the profile, then run it: 
-    ```bash
-    $ native-image \
-                -jar ./target/searchbot-1.0-jar-with-dependencies.jar \
-                -H:+AllowDeprecatedBuilderClassesOnImageClasspath \
-                -Ob \
-                --gc=G1 \
-                --enable-sbom=cyclonedx \
-                -H:-MLProfileInference \
-                -march:native \
-                --pgo \
-                -o ./target/searchbot-optimized
+    $ ./target/searchbot-optimized “What is JavaDay Lviv?”
     ```
 
+3. Compare the sizes of all relevant output files:
     ```bash
-    $ ./target/searchbot-pgo-optimized “What is JavaDay Lviv?”
+    $ du -h target/searchbot*
     ```
-    
-    Run `native-image --help` for the explanations of the build options used. 
+
+    You should see the output similar to this:
+    ```
+    35M	target/searchbot
+    208M	target/searchbot-1.0-jar-with-dependencies.jar
+    8.0K	target/searchbot-1.0.jar
+    31M	target/searchbot-optimized
+    ```
+
+There are other Native Image techniques that can improve your application performance and positively affect the executable size, for example [Profile-Guided Optimizations (PGO)](https://www.graalvm.org/latest/reference-manual/native-image/optimizations-and-performance/PGO/). 
+The improvement degree depends on the application complexity. 
+Find more in the [Native Image Optimizations and Performance documentation](https://www.graalvm.org/jdk23/reference-manual/native-image/optimizations-and-performance/#optimization-levels).
 
 ### Learn More
 
 - [Native Image Command-line Options](https://www.graalvm.org/jdk23/reference-manual/native-image/overview/Options/)
-- [Native Image Documentation on Profile-Guided Optimizations](https://www.graalvm.org/latest/reference-manual/native-image/optimizations-and-performance/PGO/)
+- [Native Image Optimizations and Performance](https://www.graalvm.org/jdk23/reference-manual/native-image/optimizations-and-performance/#optimization-levels)
+- [Native Image Build Tools](https://graalvm.github.io/native-build-tools/latest/index.html)
