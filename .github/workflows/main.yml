@@ -1,0 +1,59 @@
+name: Github Actions Pipeline
+on: [push, pull_request]
+jobs:
+  build:
+    name: Run Native LangChain4j Searchbot
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    timeout-minutes: 30    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up GraalVM
+      uses: graalvm/setup-graalvm@v1
+      with:
+        java-version: '23-ea'
+        distribution: 'graalvm'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build with Native Image Maven Plugin
+      run: |
+        mvn --no-transfer-progress -Pnative package
+        export OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"        
+        echo "What is JavaDay Lviv?"
+        ./target/searchbot "What is JavaDay Lviv?"
+
+    - name: Build with -Ob optimization
+      run: |
+        native-image \
+                    -Ob \
+                    -jar ./target/searchbot-1.0-jar-with-dependencies.jar \
+                    -H:+AllowDeprecatedBuilderClassesOnImageClasspath \
+                    -o ./target/searchbot-optimized
+        export OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
+        echo "What is JavaDay Lviv?"
+        ./target/searchbot "What is JavaDay Lviv?"
+
+    - name: Build with jlink
+      run: |
+        jlink \
+          --module-path ./target/searchbot-1.0-jar-with-dependencies.jar \
+          --strip-debug \
+          --compress zip-9 \
+          --no-header-files \
+          --no-man-pages \
+          --strip-java-debug-attributes \
+          --output ./target/searchbot-jlink
+        export OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
+        echo "What is JavaDay Lviv?"
+        ./target/searchbot "What is JavaDay Lviv?"
+
+    - name: Compare file sizes
+      run: du -h target/searchbot*
+
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: native-binaries-${{ matrix.os }}
+        path: |
+          target/searchbot*
