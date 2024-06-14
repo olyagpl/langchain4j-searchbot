@@ -114,7 +114,7 @@
                         <configuration>
                             <quickBuild>true</quickBuild>
                             <buildArgs>
-                                <buildArg>-H:+AllowDeprecatedBuilderClassesOnImageClasspath</buildArg>
+                                <buildArg>-H:+AllowDeprecatedBuilderClassesOnImageClasspath -H:+BuildReport</buildArg>
                             </buildArgs>
                         </configuration>
                     </plugin>
